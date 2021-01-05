@@ -1,11 +1,26 @@
 // Import dependencies
 const express = require('express')
+const expressWs = require('express-ws')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const path = require('path')
 
 // Create a new express application named 'app'
 const app = express()
+expressWs(app)
+
+const connections = new Set()
+const wsHandler = (ws) => {
+  connections.add(ws)
+  ws.on('message', (message) => {
+    connections.forEach((conn) => conn.send(message))
+  })
+  ws.on('close', () => {
+    connections.delete(ws)
+  })
+}
+
+app.ws('/chat', wsHandler)
 
 // Set our backend port to be either an environment variable or port 5000
 const port = process.env.PORT || 5000
@@ -26,6 +41,7 @@ app.use(
 
 // Require Route
 const api = require('./routes/routes')
+const { ws } = require('./routes/routes')
 // Configure app to use route
 app.use('/api/v1/', api)
 
