@@ -1,11 +1,10 @@
-import React, { Component } from 'react'
+import React from 'react'
 import './App.css'
-import axios from 'axios'
 import MessageWindow from './MessageWindow'
 import TextBar from './TextBar'
 import { registerOnMessageCallback, send } from './websocket'
 
-class App extends Component {
+export class App extends React.Component {
   state = {
     messages: [],
     username: null,

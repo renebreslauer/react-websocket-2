@@ -5,25 +5,33 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const path = require('path')
 
+let messageCache = [
+
+]
 // Create a new express application named 'app'
 const app = express()
 expressWs(app)
 
 const connections = new Set()
 const wsHandler = (ws) => {
+  // Add the connection to our set
   connections.add(ws)
+
+  // We define the handler to be called everytime this
+  // connection receives a new message from the client
   ws.on('message', (message) => {
+    // Once we receive a message, we send it to all clients
+    // in the connection set
+    messageCache.push(message)
     connections.forEach((conn) => conn.send(message))
   })
-  ws.on('close', () => {
-    connections.delete(ws)
-  })
-}
+
+  messageCache.forEach(msg => ws.send(msg))
 
 app.ws('/chat', wsHandler)
 
 // Set our backend port to be either an environment variable or port 5000
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 8080
 
 // This application level middleware prints incoming requests to the servers console, useful to see incoming requests
 app.use((req, res, next) => {
